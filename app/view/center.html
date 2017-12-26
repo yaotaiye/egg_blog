@@ -1,0 +1,123 @@
+{% include "./common/header.html" %}
+{% include "./common/nav.html" %}
+
+<div class="layui-container mt-10  pd-10">
+  {% block header %}
+  <div class="  layui-row bg-white pd-10">
+     <div class="layui-col-xs12 layui-col-sm6 layui-col-md4"><img src="/public/upload/{{user.avatar}}" class="layui-nav-img" alt="">{{user.cname}} 性别：{% if user.sex==1 %} 男 {% else %} 女 {% endif %} </div>
+     <div class="layui-col-xs12 layui-col-sm6 layui-col-md4 mt-5">电话：{{user.tel}}</div>
+     <div class="layui-col-xs12 layui-col-sm6 layui-col-md4 mt-5"> 地址： {{user.adr}}</div>
+  </div>
+  {% endblock %}
+  <div class="layui-tab layui-tab-brief bg-white pd-10" lay-filter="docDemoTabBrief">
+    <ul class="layui-tab-title">
+      <li class="mypublish layui-this">我发布的</li>
+      <li class="favorite">我收藏的</li>
+      <li class="pay">我付款的</li>
+      <li class="report">我举报的</li>
+    </ul>
+    <div class="layui-tab-content" id="content">
+      <!--<div class="cl-666 pd-5 bd-b">
+        <div>asda不杀生的</div>
+        <div class="mt-5 font-12"><a href="#" class="cl-999">编辑<i class="layui-icon ">&#xe642;</i></a> <span class="cl-999">删除<i class="layui-icon ">&#xe640;</i></span></div>
+      </div>-->
+
+    </div>
+  </div>
+</div>
+
+<script>
+    //Demo
+    layui.use(['form','jquery','layer'], function(){
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+
+        //csrf 安全设置
+        function getCookie(name)
+        {
+            var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+            if(arr=document.cookie.match(reg))
+                return unescape(arr[2]);
+            else
+                return null;
+        }
+
+        var csrftoken = getCookie('csrfToken');
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader('x-csrf-token', csrftoken);
+                }
+            },
+        });
+        //我发布的
+        var html='';
+        $(".mypublish").click(function () {
+            html='';
+            $.get("/mypublish",{page:0}, function(d){
+                if(d.status==1){
+                    d.data.forEach(function (item,index) {
+                        html+='  <div class="cl-666 pd-5 bd-b">\
+                    <div>'+item.title+'</div>\
+                    <div class="mt-5 font-12"><a href="/articleedit/'+item.aid+'" class="cl-999">编辑<i class="layui-icon ">&#xe642;</i></a> <span class="cl-999 del" data-id="'+item.aid+'">删除<i class="layui-icon ">&#xe640;</i></span></div>\
+                </div>';
+                    });
+
+                    $("#content").html(html)
+
+                }else{
+                    layer.msg(d.msg,{time:2000})
+                }
+            }, "json");
+        })
+
+        //删除发布
+        $("body").on("click",".del",function () {
+            var id=$(this).attr("data-id");
+            var _this=$(this);
+            layer.confirm('确定要删除吗', function(index){
+                $.post("/articledel",{id:id}, function(d){
+                    if(d.status==1){
+                        layer.msg(d.msg,{time:1000},function () {
+                            _this.parent().parent().remove();
+                        })
+                    }else{
+                        layer.msg(d.msg,{time:1000})
+                    }
+                })
+
+                layer.close(index);
+            });
+        });
+        //收藏
+
+        $(".favorite").click(function () {
+            html='';
+            $.get('/favarticle',{page:0},function (d){
+                if(d.status==1){
+                    d.data.forEach(function (item,index) {
+                        html+='  <div class="cl-666 pd-5 bd-b">\
+                    <div>'+item.title+'</div>\
+                    <div class="mt-5 font-12"><a href="/favoriteedit/'+item.aid+'" class="cl-999">编辑<i class="layui-icon ">&#xe642;</i></a> <span class="cl-999 del" data-id="'+item.aid+'">删除<i class="layui-icon ">&#xe640;</i></span></div>\
+                </div>';
+                    });
+
+                    $("#content").html(html)
+
+                }else{
+                    layer.msg(d.msg,{time:2000})
+                }
+            },"json")
+        });
+
+        $(".mypublish").trigger("click")
+
+    });
+</script>
+
+{% include "./common/footer.html" %}

@@ -1,0 +1,21 @@
+{% include "./header.html" %}
+
+<div class="pd-10 bg-white  layui-container" style="margin-top:5%">
+    {% block ss %}
+       <h2 class="text-center font-20 cl-333 mt-20">{{ article.title }}</h2>
+       <div class="text-center cl-999 font-12 mt-10">
+         <span class="mr-10"> 作者：{{ article.cname }}</span>
+          <span class="mr-10">发布时间：{{ article.time }}</span>
+          <span class="mr-10">阅读：{{ article.views }}</span>
+          <span class="mr-10">购买数：{{ article.views }}</span>
+          <span class="mr-10">赞：{{ article.useful }}</span>
+          <span class="mr-10">踩{{ article.useless }}</span>
+       </div>
+       <div class="content cl-666 mt-20 pb-20" style="min-height:500px;">
+          {{ article.content | safe  }}
+
+       </div>
+   {% endblock %}
+</div>
+
+{% include "./footer.html" %}

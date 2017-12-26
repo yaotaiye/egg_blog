@@ -1,0 +1,120 @@
+{% include "./common/header.html" %}
+{% include "./common/nav.html" %}
+
+<div class="layui-container mt-20">
+  <div class="layui-form" action="/userinsert">
+    <div class="layui-form-item">
+      <label class="layui-form-label">真实姓名</label>
+      <div class="layui-input-block">
+        <input type="text" name="name" required  lay-verify="required" placeholder="请输入真实姓名" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">用户名</label>
+      <div class="layui-input-block">
+        <input type="text" name="cname" required  lay-verify="required" placeholder="请输入用户昵称" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">密码</label>
+      <div class="layui-input-block">
+        <input type="password" name="psw" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">确认密码</label>
+      <div class="layui-input-block">
+        <input type="password" name="rpsw" required lay-verify="required" placeholder="请输入确认密码" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <div class="layui-form-label">头像上传</div>
+      <div class="layui-input-block">
+          <button type="button" class="layui-btn" id="test1">
+            <i class="layui-icon">&#xe67c;</i>上传图片
+          </button>
+        <div id="pic"></div>
+        <input id="avatar" type="text" name="avatar"  style="display: none;" class="layui-input">
+      </div>
+
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">联系电话</label>
+      <div class="layui-input-block">
+        <input type="text" name="tel" required  lay-verify="required" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">性别</label>
+      <div class="layui-input-block">
+        <input type="radio" name="sex" value="1" title="男" checked>
+        <input type="radio" name="sex" value="0" title="女" >
+      </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+      <label class="layui-form-label">地址</label>
+      <div class="layui-input-block">
+        <textarea name="adr" placeholder="请输入地址" class="layui-textarea"></textarea>
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <div class="layui-input-block">
+        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    //Demo
+    layui.use(['form','jquery','upload'], function(){
+        var form = layui.form;
+        var $ = layui.jquery;
+
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+           if(data.field.psw!=data.field.rpsw){
+               layer.msg('密码不一致',{time:2000});
+           }
+           var pdata={}
+           for(item in data.field){
+               if(item!="rpsw"){
+                   pdata[item]=data.field[item]
+               }
+           }
+            $.post("/signup", pdata, function(data){
+                  if(data.status==1){
+                      layer.msg(data.msg,{time:2000})
+                  }else{
+                      layer.msg(data.msg,{time:2000})
+                  }
+                }, "json");
+            return false;
+        });
+        //ajax上传
+        var upload = layui.upload;
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#test1' //绑定元素
+            ,url: '/upload' //上传接口
+            ,method:"post"
+            ,done: function(res){
+                //上传完毕回调
+                if(res.code==1){
+                    $("#pic").html('<img src="public/upload/'+res.data.src+'">')
+                    $("#avatar").val(res.data.src)
+                }else{
+                    layer.msg(res.msg,{time:2000});
+                }
+            }
+            ,error: function(index, upload){
+                //请求异常回调
+                console.log(index)
+            }
+        });
+    });
+</script>
+
+{% include "./common/footer.html" %}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>{{title}}</title>
+		<link rel="stylesheet" href="/public/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/public/css/login.css" />
+	</head>
+
+	<body class="beg-login-bg">
+		<div class="beg-login-box">
+			<header>
+				<h1>后台登录</h1>
+			</header>
+			<div class="beg-login-main">
+				<form action="#" class="layui-form" method="post">
+					<div class="layui-form-item">
+						<label class="beg-login-icon">
+                        <i class="layui-icon">&#xe612;</i>
+                    </label>
+						<input type="text" name="cname" required  lay-verify="required" placeholder="请输入用户昵称" autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-form-item">
+						<label class="beg-login-icon">
+                        <i class="layui-icon">&#xe642;</i>
+                    </label>
+						<input type="password" name="psw" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-form-item">
+						<div class="layui-row">
+							<div class="layui-col-xs6 "><input type="text" id="yzm" name="yzm" required lay-verify="required" placeholder="请输入验证码" autocomplete="off" class="layui-input"></div>
+							<div class="layui-col-xs6 " id="yzmImg">&nbsp;</div>
+						</div>
+
+					</div>
+					<div class="layui-form-item">
+						<div class="beg-pull-left beg-login-remember">
+							<input type="checkbox" name="rememberMe" title="自动登录" lay-skin="primary" >
+						</div>
+						<div class="beg-pull-right">
+							<button  id="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="formDemo">
+                            <i class="layui-icon">&#xe650;</i> 登录
+                        </button>
+						</div>
+						<div class="beg-clear"></div>
+					</div>
+				</form>
+			</div>
+
+		</div>
+		<script type="text/javascript" src="/public/plugins/layui/layui.js"></script>
+		<script>
+            layui.use(['form','jquery'], function(){
+				var layer = layui.layer,
+					$ = layui.jquery;
+                 var form = layui.form;
+
+				$("#yzmImg").click(function () {
+                    $.get("/admin/captcha",{},function (data) {
+                       $("#yzmImg").html(data);
+                    })
+				});
+                $("#yzmImg").trigger("click");
+                $("#yzm").keyup(function () {
+					$(this).val($(this).val().toLowerCase())
+                })
+                //监听提交
+                form.on('submit(formDemo)', function(data){
+                    $.post("/admin/sign", data.field, function(d){
+                        if(d.status==1){
+                            layer.msg(d.msg,{time:2000}, function(){
+                                window.location.href=d.url;
+                            })
+                        }else{
+                            layer.msg(d.msg,{time:2000})
+                        }
+                    }, "json");
+                    return false;
+                });
+                document.onkeyup = function (e) {//按键信息对象以函数参数的形式传递进来了，就是那个e
+                    var code = e.charCode || e.keyCode;  //取出按键信息中的按键代码(大部分浏览器通过keyCode属性获取按键代码，但少部分浏览器使用的却是charCode)
+                    if (code == 13) {
+                        $("#submit").trigger("click")
+                    }
+                }
+					
+
+			});
+		</script>
+	</body>
+
+</html>

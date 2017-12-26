@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="/public/plugins/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/public/css/main.css" />
+    <script type="text/javascript" src="/public/plugins/layui/layui.js"></script>
+    <script>
+        layui.use(['jquery'], function() {
+            var $ = layui.jquery;
+            //csrf 安全设置
+            function getCookie(name)
+            {
+                var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+                if(arr=document.cookie.match(reg))
+                    return unescape(arr[2]);
+                else
+                    return null;
+            }
+
+            var csrftoken = getCookie('csrfToken');
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader('x-csrf-token', csrftoken);
+                    }
+                },
+            });
+        })
+    </script>
+</head>
+
+<body>

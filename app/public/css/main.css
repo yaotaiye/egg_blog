@@ -1,0 +1,18 @@
+.admin-main{
+	margin: 15px;
+}
+.admin-main .layui-field-title .layui-field-box{
+	padding: 10px 30px;
+}
+.admin-main .layui-field-title .layui-field-box p{
+	padding: 5px 0;
+}
+.pr-10{
+	padding-right:10px;
+}
+.mt-10{
+	margin-top: 10px;
+}
+.text-center{
+	text-align: center;
+}

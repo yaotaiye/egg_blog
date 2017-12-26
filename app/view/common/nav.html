@@ -1,0 +1,35 @@
+{% block header %}
+<ul class="layui-nav">
+    <li class="layui-nav-item">
+        <a href="/">首页</a>
+    </li>
+    {% if user==null %}
+    <li class="layui-nav-item">
+        <a href="/signup">注册</a>
+    </li>
+    <li class="layui-nav-item">
+        <a href="/sign">登录</a>
+    </li>
+    {% endif  %}
+    <li class="layui-nav-item">
+        <a href="/center">个人中心</a>
+    </li>
+    <li class="layui-nav-item">
+        {% if user!=null %}
+        <a href="javascript:;"><img src="/public/upload/{{user.avatar}}" class="layui-nav-img">{{user.cname}}</a>
+        {% else  %}
+        <a href="javascript:;"><img src="/public/upload/0.jpg" class="layui-nav-img">未登录</a>
+        {% endif  %}
+        <dl class="layui-nav-child">
+            <dd><a href="/useredit">修改信息</a></dd>
+            <dd><a href="/publish">文章发布</a></dd>
+            <dd><a href="/signout">退出</a></dd>
+        </dl>
+    </li>
+</ul>
+{% endblock %}
+<script>
+    layui.use(['element'], function(){
+      var   element = layui.element;
+    })
+</script>

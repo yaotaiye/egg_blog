@@ -1,0 +1,108 @@
+{% include "./common/header.html" %}
+{% include "./common/nav.html" %}
+{% block header %}
+<div class="layui-container mt-20">
+  <div class="layui-form" action="/userinsert">
+    <div class="layui-form-item">
+      <label class="layui-form-label">文章标题</label>
+      <div class="layui-input-block">
+        <input type="text" name="title"   value="{{article.title}}" placeholder="请输入文章标题" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">简介</label>
+      <div class="layui-input-block">
+        <input type="text" name="summary"  value="{{article.summary}}" placeholder="请输入文章简介" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">价格</label>
+      <div class="layui-input-block">
+        <input type="text" name="price" value="{{article.price}}" placeholder="请输入文章价格" autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">类别</label>
+      <div class="layui-input-block">
+        <select name="type" lay-verify="required">
+          {% for item in type %}
+            <option value="{{item.val}}" {% if article.type==item.val %} selected {% endif %}>{{item.txt}}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <div class="layui-form-label">文章封面</div>
+      <div class="layui-input-block">
+          <button type="button" class="layui-btn" id="test1">
+            <i class="layui-icon">&#xe67c;</i>上传图片
+          </button>
+        <div id="pic"><img src="/public/upload/{{article.cover}}" alt=""></div>
+        <input id="cover" value="{{article.cover}}"type="text" name="cover"  style="display: none;" class="layui-input">
+      </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text layui-clear">
+      <div class="layui-form-label" style="float: none">文章内容</div>
+      <div class="bg-white" >
+        <textarea id="content" name="content" style="display: none;">{{article.content}}</textarea>
+      </div>
+    </div>
+    {% endblock  %}
+    <div class="layui-form-item">
+      <div class="layui-input-block">
+        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    //Demo
+    layui.use(['form','jquery','upload','layedit'], function(){
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layedit = layui.layedit;
+        var editIndex= layedit.build("content", {height:180})
+
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+
+            const {title,summary,price,type,cover}=data.field;
+            $.post("/articleedit/{{article.aid}}", {title:title,summary:summary,price:price,cover:cover,type:type,content:layedit.getContent(editIndex)}, function(data){
+                  if(data.status==1){
+                      layer.msg(data.msg,{time:2000},function () {
+                          window.location.href='/view/'+data.id;
+                      })
+                  }else{
+                      layer.msg(data.msg,{time:2000})
+                  }
+                }, "json");
+
+            return false;
+         });
+        //ajax上传
+        var upload = layui.upload;
+        //执行实例
+        var uploadInst = upload.render({
+            elem: '#test1' //绑定元素
+            ,url: '/upload' //上传接口
+            ,method:"post"
+            ,done: function(res){
+                //上传完毕回调
+                if(res.code==1){
+                    $("#pic").html('<img src="public/upload/'+res.data.src+'">')
+                    $("#cover").val(res.data.src)
+                }else{
+                    layer.msg(res.msg,{time:2000});
+                }
+            }
+            ,error: function(index, upload){
+                //请求异常回调
+                console.log(index)
+            }
+        });
+    });
+</script>
+
+{% include "./common/footer.html" %}

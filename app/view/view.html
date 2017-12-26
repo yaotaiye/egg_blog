@@ -1,0 +1,200 @@
+
+{% include "./common/header.html" %}
+{% include "./common/nav.html" %}
+
+
+
+<div class="pd-10 bg-white  layui-container" style="margin-top:5%">
+    {% block ss %}
+       <h2 class="text-center font-20 cl-333 mt-20">{{ article.title }}</h2>
+       <div class="text-center cl-999 font-12 mt-10">
+         <span class="mr-10"> 作者：{{ article.cname }}</span>
+          <span class="mr-10">发布时间：{{ article.time }}</span>
+          <span class="mr-10">阅读：{{ article.views }}</span>
+          <span class="mr-10">购买数：{{ article.views }}</span>
+          <span class="mr-10">赞：{{ article.useful }}</span>
+          <span class="mr-10">踩{{ article.useless }}</span>
+
+       </div>
+       <div class="content cl-666 mt-20 pb-20" style="min-height:200px;">
+          {{ article.content | safe  }}
+
+       </div>
+       <div class="font-18 mt-20 cl-333 bd-b pb-5">
+           热门评论
+       </div>
+       <div class="comment">
+
+         <!-- <div class="item mt-10">
+              <div class="layui-clear title">
+                  <img src="/public/upload/0.jpg" class="pic" alt=""> <span class="cl-000 font-12 pl-5">孤胆篮子</span>
+                 <div class="fr font-12 cl-999 lh-16"><span class="num">5</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>
+              </div>
+              <div class="content pl-10 pr-5 pt-5">
+                  <div class="font-14 cl-666">啊是大号杀啥</div>
+                  <div class="font-12 cl-999 mt-5"><span class="mr-10">2017-05-01 52：12</span> <span class="btn ">回复</span></div>
+                  <div class="reply bd-b mt-10 pb-10">
+                      <div class="layui-clear pl-10 pr-10 pt-10 lh-12">
+                          <span class="cl-000 font-12 ">十大杀手</span>
+                          <div class="fr font-12 cl-999 lh-16 "><span class="num">5</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>
+                          <div class="font-12 cl-666 mt-5">收费的时刻都加上快递费</div>
+                      </div>
+                      <div class="layui-clear pl-10 pr-10 pt-10 lh-12 font-12">
+                          <span class="cl-000 ">孤胆篮子</span><span class="cl-ccc">回复</span><span class="cl-000 ">十大杀手</span>
+                          <div class="fr cl-999 lh-16 "><span class="num">5</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>
+                          <div class="cl-666 mt-5">收费的时刻都加上快递费</div>
+                      </div>
+                  </div>
+              </div>
+          </div>-->
+
+       </div>
+   {% endblock %}
+</div>
+<div class="comment-box pd-10" style="background-color:#393D49;">
+    <textarea id="content" style="min-height: 50px; font-size: 12px; color: #666;" name="" required lay-verify="required"  placeholder="请输入要回复的信息" class="layui-textarea"></textarea>
+    <div class="layui-row font-12 pt-10 ">
+        <div class="cl-999 layui-col-xs8 pt-5 ">点击白色区域处收回输入框</div>
+        <div class=" layui-col-xs4 "><button style="width: 100%;" id="subBtn" class="layui-btn  layui-btn-sm  layui-btn-normal">提交</button></div>
+    </div>
+</div>
+<input type="text" hidden id="from_id">
+<input type="text" hidden id="to_id">
+<input type="text" hidden id="article_id">
+<input type="text" hidden id="parent_type">
+<input type="text" hidden id="parent_id">
+<script>
+
+//注意：导航 依赖 element 模块，否则无法进行功能性操作
+layui.use(['jquery','layer', 'form','element'], function(){
+  var layer = layui.layer,
+  form = layui.form,
+  element = layui.element,
+  $=layui.jquery;
+  var id={{ article.aid  }}
+  var uid={{ user.id  }}
+
+  $.get("/getComment",{id:id ,type:1,page:0},function (data) {
+
+      var header='<div class="item mt-10">';
+      var footer='</div>';
+
+      if(data.status==1){
+          var result=data.data;
+          var html='';
+
+          result.forEach(function (item,index) {
+              var lis="";
+              var content='';
+              lis+=' <div class="layui-clear title">\
+                  <img src="/public/upload/'+item.avatar+'" class="pic" alt=""> <span class="cl-000 font-12 pl-5">'+item.cname+'</span>\
+                  <div class="fr font-12 cl-999 lh-16"><span class="num">'+item.likeCount+'</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>\
+              </div>';
+              content+=' <div class="font-14 cl-666">'+item.content+'</div>\
+                  <div class="font-12 cl-999 mt-5"><span class="mr-10">'+item.c_time+'</span> <span class="btn secondReply" data-uid="'+item.from_id+'" data-pid="'+item.id+'" data-name="'+item.cname+'">回复</span></div>';
+              var reply='';
+              /*if(item.comments.length>0){
+                  item.comments.forEach(function (item2,index2) {
+                      reply+='<div data-pid="'+item2.parent_id+'" data-name="'+item2.cname+'" data-uid="'+item2.uid+'" class="threeReply layui-clear pl-10 pr-10 pt-10 lh-12 font-12">\
+                  <span class="cl-000  ">'+item2.cname+'</span>\
+                  <div class="fr cl-999 lh-16 "><span class="num">'+item2.likeCount+'</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>\
+              <div class=" cl-666 mt-5">'+item2.content+'</div>\
+                  </div>';
+                  });
+              }*/
+              if(item.comments.length>0){
+                  item.comments.forEach(function (item2,index2) {
+                      //二级回复
+                      if(item2.parent_type==2){
+                          reply+='<div data-pid="'+item2.parent_id+'" data-name="'+item2.cname+'" data-uid="'+item2.uid+'" class="threeReply layui-clear pl-10 pr-10 pt-10 lh-12 font-12">\
+                  <span class="cl-000  ">'+item2.cname+'</span>\
+                  <div class="fr cl-999 lh-16 "><span class="num">'+item2.likeCount+'</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>\
+              <div class=" cl-666 mt-5">'+item2.content+'</div>\
+                  </div>';
+                      }else{ //三级回复
+                          reply+='<div data-pid="'+item2.parent_id+'" data-name="'+item2.cname+'"  data-uid="'+item2.uid+'" class="threeReply layui-clear pl-10 pr-10 pt-10 lh-12 font-12">\
+                  <span class="cl-000  ">'+item2.cname+'</span><span class="cl-ccc">回复</span><span class="cl-000  ">'+item2.t_cname+'</span>\
+                  <div class="fr cl-999 lh-16 "><span class="num">'+item2.likeCount+'</span> <span class=" layui-icon font-12">&#xe6c6;</span></div>\
+              <div class=" cl-666 mt-5">'+item2.content+'</div>\
+                  </div>';
+                      }
+                      
+                      
+                  });
+              }
+              if(item.comments.length>0){  reply='<div class="reply bd-b mt-10 pb-10">'+reply+'</div>'; }
+              html+='<div class="item mt-10">'+lis+'<div class="content pl-10 pr-5 pt-5">'+content+reply+'</div></div>';
+
+          });
+          $(".comment").append(html);
+      }else{
+          layer.msg(data.msg,{time:2000});
+      }
+    },"json");
+
+    //发表p评论
+    $("#article_id").val(id);
+    $("#from_id").val(uid)
+    $("#subBtn").click(function () {
+        var from_id=$("#from_id").val(),
+            to_id=$("#to_id").val(),
+            content=$("#content").val(),
+            article_id=$("#article_id").val(),
+            parent_type=$("#parent_type").val()||1,
+            parent_id=$("#parent_id").val();
+        if(content.length<5){
+            layer.msg("请输入不少于5字评论",{time:1000});
+            return;
+        }
+        $.post("/insertComment",{from_id,to_id,content,article_id,parent_type,parent_id},function(data){
+            if(data.status==1){
+                layer.msg(data.msg,{time:2000},function () {
+                    window.location.reload()
+                });
+            }else{
+                layer.msg(data.msg,{time:2000});
+            }
+
+        },"json")
+    })
+
+   //alert($("#from_id").val())
+   $("#content").click(function () {
+           $(".comment-box").addClass("show");
+           return false;
+      });
+    $(".layui-container").click(function () {
+        $(".comment-box").removeClass("show");
+        //关闭切换回一级评论状态
+        $("#content").attr("placeholder","请输入要回复的信息");
+        $("#from_id").val(uid);
+        $("#parent_type").val(1);
+        $("#parent_id").val("");
+        $("#content").val("")
+        $("#to_id").val("")
+    });
+    $("body").on("click",".secondReply",function () {
+        $(".comment-box").addClass("show");
+        var p_id=$(this).attr("data-pid");
+        var u_id=$(this).attr("data-uid");
+        var name=$(this).attr("data-name");
+        $("#content").attr("placeholder","回复："+name);
+        $("#parent_id").val(p_id);
+        $("#to_id").val(u_id);
+        $("#parent_type").val(2);//二级回复
+    });
+    $("body").on("click",".threeReply",function () {
+        $(".comment-box").addClass("show");
+        var p_id=$(this).attr("data-pid");
+        var u_id=$(this).attr("data-uid");
+        var name=$(this).attr("data-name");
+        $("#content").attr("placeholder","回复："+name);
+        $("#parent_id").val(p_id);
+        $("#to_id").val(u_id);
+        $("#parent_type").val(3);//三级回复
+    })
+});
+</script>
+</body>
+</html>
+<!--{% include "./common/footer.html" %}-->
